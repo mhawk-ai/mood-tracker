@@ -126,6 +126,18 @@
     .mood-btn.selected .label { color: var(--mood-color, var(--accent2)); font-weight: 600; }
     .mood-btn.selected .check { opacity: 1; transform: scale(1); }
 
+    /* ---------- MOOD COLOR CODING ---------- */
+    [data-mood="great"]   { border-left: 4px solid #4ade80; background: rgba(74,222,128,0.08); }
+    [data-mood="good"]    { border-left: 4px solid #2dd4bf; background: rgba(45,212,191,0.08); }
+    [data-mood="okay"]    { border-left: 4px solid #facc15; background: rgba(250,204,21,0.08); }
+    [data-mood="low"]     { border-left: 4px solid #fb923c; background: rgba(251,146,60,0.08); }
+    [data-mood="sad"]     { border-left: 4px solid #60a5fa; background: rgba(96,165,250,0.08); }
+    [data-mood="angry"]   { border-left: 4px solid #ef4444; background: rgba(239,68,68,0.08); }
+    [data-mood="anxious"] { border-left: 4px solid #c084fc; background: rgba(192,132,252,0.08); }
+    [data-mood="tired"]   { border-left: 4px solid #94a3b8; background: rgba(148,163,184,0.08); }
+    [data-mood="excited"] { border-left: 4px solid #f472b6; background: rgba(244,114,182,0.08); }
+    [data-mood="calm"]    { border-left: 4px solid #22d3ee; background: rgba(34,211,238,0.08); }
+
     /* ---------- LOG BUTTON ---------- */
     .log-wrap {
       margin-top: 1.2rem;
@@ -422,10 +434,10 @@
 <script>
 /* ===================== DATA ===================== */
 const MOODS = [
-  { emoji: '😄', label: 'Great',    score: 5, color: '#4ade80',  btnColor: 'rgba(74,222,128,.18)',  borderColor: '#4ade80' },
+  { emoji: '😁', label: 'Great',    score: 5, color: '#4ade80',  btnColor: 'rgba(74,222,128,.18)',  borderColor: '#4ade80' },
   { emoji: '🙂', label: 'Good',     score: 4, color: '#2dd4bf',  btnColor: 'rgba(45,212,191,.18)',  borderColor: '#2dd4bf' },
   { emoji: '😐', label: 'Okay',     score: 3, color: '#facc15',  btnColor: 'rgba(250,204,21,.18)',  borderColor: '#facc15' },
-  { emoji: '😔', label: 'Low',      score: 2, color: '#fb923c',  btnColor: 'rgba(251,146,60,.18)',  borderColor: '#fb923c' },
+  { emoji: '😕', label: 'Low',      score: 2, color: '#fb923c',  btnColor: 'rgba(251,146,60,.18)',  borderColor: '#fb923c' },
   { emoji: '😢', label: 'Sad',      score: 1, color: '#60a5fa',  btnColor: 'rgba(96,165,250,.18)',  borderColor: '#60a5fa' },
   { emoji: '😡', label: 'Angry',    score: 1, color: '#ef4444',  btnColor: 'rgba(239,68,68,.18)',   borderColor: '#ef4444' },
   { emoji: '😰', label: 'Anxious',  score: 2, color: '#c084fc',  btnColor: 'rgba(192,132,252,.18)', borderColor: '#c084fc' },
@@ -456,6 +468,7 @@ MOODS.forEach((m, i) => {
   const btn = document.createElement('button');
   btn.className = 'mood-btn';
   btn.dataset.idx = i;
+  btn.dataset.mood = m.label.toLowerCase();
   btn.dataset.color = m.borderColor;
   btn.dataset.bg = m.btnColor;
   btn.style.setProperty('--mood-color', m.borderColor);
