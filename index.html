@@ -4,80 +4,167 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mood Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Lora:ital,wght@0,400;1,400;1,600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #0d0d14;
-      --surface:   #15151f;
-      --surface2:  #1e1e2e;
-      --border:    #2a2a3e;
-      --text:      #e0e0f0;
-      --muted:     #6b6b8a;
-      --accent:    #7c6aff;
-      --accent2:   #c084fc;
-      --glow:      rgba(124,106,255,.35);
+      --paper:      #F4EFE4;
+      --paper2:     #EDE6D6;
+      --paper3:     #E3DAC5;
+      --ink:        #1C1612;
+      --ink2:       #3D3328;
+      --ink3:       #6B5B47;
+      --ink4:       #9C8A72;
+      --rule:       rgba(100,80,55,.12);
+      --terra:      #C4622D;
+      --terra-lt:   rgba(196,98,45,.12);
+      --serif:      'Playfair Display', Georgia, serif;
+      --mono:       'DM Mono', 'Courier New', monospace;
+      --lora:       'Lora', Georgia, serif;
     }
 
     html { font-size: 16px; }
+
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--lora);
       min-height: 100svh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 1.5rem 1rem 3rem;
       overflow-x: hidden;
+      cursor: default;
     }
 
-    /* ---------- HEADER ---------- */
-    header {
-      text-align: center;
-      margin-bottom: 2rem;
-      animation: fadeDown .6s ease both;
-    }
-    header h1 {
-      font-size: clamp(1.6rem, 5vw, 2.2rem);
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: -.02em;
-    }
-    header p {
-      margin-top: .35rem;
-      color: var(--muted);
-      font-size: .9rem;
+    /* ── GRAIN OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1000;
+      opacity: .032;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 200px 200px;
     }
 
-    /* ---------- CARD ---------- */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 1.25rem;
-      padding: 1.5rem;
-      width: 100%;
-      max-width: 520px;
+    /* ── RULED LINES ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 31px,
+        var(--rule) 31px,
+        var(--rule) 32px
+      );
+      background-attachment: fixed;
     }
 
-    /* ---------- MOOD PICKER ---------- */
-    .pick-section {
-      animation: fadeDown .6s .1s ease both;
+    /* ── LAYOUT ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 1.5rem 5rem;
     }
-    .pick-section h2 {
-      font-size: .8rem;
+
+    /* ── MASTHEAD ── */
+    .masthead {
+      border-bottom: 2px solid var(--ink);
+      padding: 2.5rem 0 1rem;
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem;
+      animation: fadeIn .7s ease both;
+    }
+    .masthead-left { flex: 1; }
+    .masthead-label {
+      font-family: var(--mono);
+      font-size: .65rem;
+      font-weight: 500;
+      letter-spacing: .18em;
       text-transform: uppercase;
-      letter-spacing: .1em;
-      color: var(--muted);
-      margin-bottom: 1rem;
+      color: var(--terra);
+      margin-bottom: .5rem;
+    }
+    .masthead h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.6rem, 8vw, 4.2rem);
+      font-weight: 900;
+      line-height: .92;
+      letter-spacing: -.02em;
+      color: var(--ink);
+    }
+    .masthead h1 em {
+      font-style: italic;
+      font-weight: 400;
+      color: var(--terra);
+    }
+    .masthead-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .masthead-date {
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--ink3);
+      line-height: 1.7;
+    }
+    .masthead-divider {
+      width: 1px;
+      height: 3.5rem;
+      background: var(--ink4);
+      flex-shrink: 0;
+    }
+
+    /* ── SECTION LABELS ── */
+    .section-label {
+      font-family: var(--mono);
+      font-size: .6rem;
+      font-weight: 500;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--ink4);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--paper3);
+    }
+
+    /* ── MOOD STAMP GRID ── */
+    .pick-section {
+      margin-bottom: 2.5rem;
+      animation: fadeIn .7s .1s ease both;
+    }
+    .mood-question {
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      font-style: italic;
+      color: var(--ink2);
+      margin-bottom: 1.6rem;
+      line-height: 1.4;
     }
     .mood-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: .6rem;
+      gap: .7rem;
+      margin-bottom: 1.8rem;
     }
     .mood-btn {
       all: unset;
@@ -85,282 +172,361 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: .3rem;
-      padding: .65rem .3rem;
-      border-radius: .85rem;
-      border: 1.5px solid color-mix(in srgb, var(--mood-color, var(--border)) 35%, transparent);
-      background: var(--surface2);
-      transition: transform .15s, border-color .15s, box-shadow .15s, background .15s;
+      gap: .45rem;
+      padding: .9rem .3rem .75rem;
+      border-radius: 4px;
+      border: 1.5px solid var(--paper3);
+      background: transparent;
+      transition: all .18s cubic-bezier(.25,.46,.45,.94);
       user-select: none;
       -webkit-tap-highlight-color: transparent;
       position: relative;
+      overflow: hidden;
+    }
+    /* ink-blot fill on select */
+    .mood-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 3px;
+      background: var(--mood-ink, var(--paper3));
+      transform: scale(0);
+      transform-origin: center;
+      transition: transform .22s cubic-bezier(.34,1.56,.64,1);
+      opacity: .13;
     }
     .mood-btn:hover {
-      transform: translateY(-3px) scale(1.06);
-      border-color: color-mix(in srgb, var(--mood-color, var(--border)) 70%, transparent);
-      background: color-mix(in srgb, var(--mood-color, var(--border)) 12%, var(--surface2));
-      box-shadow: 0 0 12px color-mix(in srgb, var(--mood-color, transparent) 40%, transparent);
+      border-color: var(--mood-ink, var(--ink3));
+      background: color-mix(in srgb, var(--mood-ink, var(--ink)) 6%, transparent);
+      transform: translateY(-2px);
     }
-    .mood-btn:active { transform: scale(.94); }
-    .mood-btn .emoji { font-size: 1.9rem; line-height: 1; }
-    .mood-btn .label { font-size: .62rem; color: var(--muted); font-weight: 500; letter-spacing: .03em; }
-    .mood-btn .check {
-      position: absolute;
-      top: .3rem;
-      right: .35rem;
-      font-size: .65rem;
-      font-weight: 700;
-      color: var(--mood-color, var(--accent));
-      opacity: 0;
-      transform: scale(0);
-      transition: opacity .15s, transform .2s cubic-bezier(.34,1.56,.64,1);
+    .mood-btn:hover::before { transform: scale(1); }
+    .mood-btn:active { transform: scale(.93); }
+
+    .mood-btn .emoji {
+      font-size: 1.75rem;
       line-height: 1;
+      filter: saturate(.9);
+      transition: transform .18s;
     }
+    .mood-btn:hover .emoji { transform: scale(1.15) rotate(-4deg); }
+
+    .mood-btn .label {
+      font-family: var(--mono);
+      font-size: .58rem;
+      font-weight: 500;
+      letter-spacing: .07em;
+      color: var(--ink4);
+      text-transform: uppercase;
+      transition: color .18s;
+    }
+
+    /* selected state */
     .mood-btn.selected {
-      transform: scale(1.12);
-      border-color: var(--mood-color, var(--accent)) !important;
-      background: color-mix(in srgb, var(--mood-color, var(--accent)) 18%, var(--surface2)) !important;
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--mood-color, var(--accent)) 35%, transparent),
-                  0 0 22px color-mix(in srgb, var(--mood-color, var(--accent)) 55%, transparent) !important;
+      border-color: var(--mood-ink, var(--ink)) !important;
+      background: color-mix(in srgb, var(--mood-ink, var(--ink)) 10%, var(--paper)) !important;
+      transform: scale(1.08) translateY(-2px) !important;
+      box-shadow: 3px 3px 0 var(--mood-ink, var(--ink)) !important;
     }
-    .mood-btn.selected .label { color: var(--mood-color, var(--accent2)); font-weight: 600; }
-    .mood-btn.selected .check { opacity: 1; transform: scale(1); }
+    .mood-btn.selected::before { transform: scale(1); opacity: .2; }
+    .mood-btn.selected .emoji { transform: scale(1.1); }
+    .mood-btn.selected .label { color: var(--mood-ink, var(--ink)); font-weight: 500; }
 
-    /* ---------- MOOD COLOR CODING ---------- */
-    [data-mood="great"]   { border-left: 4px solid #4ade80; background: rgba(74,222,128,0.08); }
-    [data-mood="good"]    { border-left: 4px solid #2dd4bf; background: rgba(45,212,191,0.08); }
-    [data-mood="okay"]    { border-left: 4px solid #facc15; background: rgba(250,204,21,0.08); }
-    [data-mood="low"]     { border-left: 4px solid #fb923c; background: rgba(251,146,60,0.08); }
-    [data-mood="sad"]     { border-left: 4px solid #60a5fa; background: rgba(96,165,250,0.08); }
-    [data-mood="angry"]   { border-left: 4px solid #ef4444; background: rgba(239,68,68,0.08); }
-    [data-mood="anxious"] { border-left: 4px solid #c084fc; background: rgba(192,132,252,0.08); }
-    [data-mood="tired"]   { border-left: 4px solid #94a3b8; background: rgba(148,163,184,0.08); }
-    [data-mood="excited"] { border-left: 4px solid #f472b6; background: rgba(244,114,182,0.08); }
-    [data-mood="calm"]    { border-left: 4px solid #22d3ee; background: rgba(34,211,238,0.08); }
-
-    /* ---------- LOG BUTTON ---------- */
+    /* ── LOG BUTTON ── */
     .log-wrap {
-      margin-top: 1.2rem;
       display: flex;
-      justify-content: center;
+      align-items: center;
+      gap: 1.2rem;
     }
     .log-btn {
       all: unset;
       cursor: pointer;
-      background: linear-gradient(135deg, #c084fc, #7c6aff, #e879a0, #b46fff);
-      background-size: 200% 200%;
-      color: #fff;
-      font-size: 1.2rem;
-      font-weight: 800;
-      padding: 1.1rem 4rem;
-      border-radius: 2rem;
-      transition: opacity .15s, transform .15s, box-shadow .15s;
-      box-shadow: 0 4px 32px rgba(124,106,255,.75), 0 0 20px rgba(192,132,252,.45),
-                  inset 0 1px 0 rgba(255,255,255,.25);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      text-shadow: 0 1px 4px rgba(0,0,0,.4);
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--paper);
+      background: var(--ink);
+      padding: .85rem 2.5rem;
+      border-radius: 2px;
+      letter-spacing: .02em;
+      position: relative;
+      overflow: hidden;
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 4px 4px 0 var(--ink4);
     }
-    .log-btn:disabled { opacity: .3; cursor: default; box-shadow: none; }
+    .log-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--terra);
+      transform: translateX(-101%);
+      transition: transform .28s cubic-bezier(.65,0,.35,1);
+    }
+    .log-btn span { position: relative; z-index: 1; }
     .log-btn:not(:disabled):hover {
-      transform: translateY(-4px) scale(1.07);
-      box-shadow: 0 12px 48px rgba(124,106,255,.85), 0 0 32px rgba(192,132,252,.6),
-                  0 0 0 4px rgba(124,106,255,.3), inset 0 1px 0 rgba(255,255,255,.25);
+      transform: translate(-2px,-2px);
+      box-shadow: 6px 6px 0 var(--ink);
     }
-    .log-btn:not(:disabled):active { transform: scale(.96); }
-
-    /* success flash */
-    .log-btn.flash { animation: btnFlash .45s ease; }
-    @keyframes btnFlash {
+    .log-btn:not(:disabled):hover::after { transform: translateX(0); }
+    .log-btn:not(:disabled):active { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink4); }
+    .log-btn:disabled {
+      opacity: .35;
+      cursor: default;
+      box-shadow: 2px 2px 0 var(--ink4);
+    }
+    .log-hint {
+      font-family: var(--mono);
+      font-size: .65rem;
+      color: var(--ink4);
+      font-style: italic;
+    }
+    .log-btn.flash { animation: stampPress .35s ease; }
+    @keyframes stampPress {
       0%   { transform: scale(1); }
-      30%  { transform: scale(1.08); }
+      30%  { transform: translate(2px,2px) scale(.95); box-shadow: 2px 2px 0 var(--ink4); }
+      60%  { transform: translate(-2px,-2px) scale(1.04); }
       100% { transform: scale(1); }
     }
 
-    /* ---------- DIVIDER ---------- */
-    .divider {
-      height: 1px;
-      background: var(--border);
-      margin: 1.5rem 0;
+    /* ── DIVIDER ── */
+    .ink-rule {
+      border: none;
+      border-top: 1px solid var(--paper3);
+      margin: 2rem 0;
+    }
+    .ink-rule.heavy {
+      border-top: 2px solid var(--ink);
+      margin: 2.5rem 0;
     }
 
-    /* ---------- CHART SECTION ---------- */
+    /* ── CHART SECTION ── */
     .chart-section {
-      animation: fadeUp .6s .2s ease both;
+      margin-bottom: 2.5rem;
+      animation: fadeIn .7s .2s ease both;
     }
-    .chart-header {
+    .chart-controls-row {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
+      justify-content: space-between;
+      margin-bottom: 1.2rem;
     }
-    .chart-header h2 {
-      font-size: .8rem;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: var(--muted);
-    }
-    .chart-controls {
+    .view-toggle {
       display: flex;
-      gap: .4rem;
+      gap: 0;
+      border: 1.5px solid var(--paper3);
+      border-radius: 2px;
+      overflow: hidden;
     }
     .view-btn {
       all: unset;
       cursor: pointer;
-      font-size: .7rem;
-      font-weight: 600;
-      padding: .3rem .75rem;
-      border-radius: .5rem;
-      color: var(--muted);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      letter-spacing: .04em;
-      transition: color .15s, background .15s, border-color .15s;
+      font-family: var(--mono);
+      font-size: .6rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .35rem .85rem;
+      color: var(--ink4);
+      background: transparent;
+      transition: color .15s, background .15s;
+      border-right: 1.5px solid var(--paper3);
     }
+    .view-btn:last-child { border-right: none; }
     .view-btn.active {
-      color: var(--accent2);
-      background: rgba(124,106,255,.15);
-      border-color: var(--accent);
+      color: var(--paper);
+      background: var(--ink);
     }
 
-    /* Canvas wrapper */
+    /* graph paper canvas wrap */
     .canvas-wrap {
       position: relative;
       width: 100%;
-      height: 180px;
-      margin-bottom: .5rem;
+      height: 190px;
+      background:
+        linear-gradient(var(--rule) 1px, transparent 1px),
+        linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+      background-size: 32px 32px;
+      background-color: color-mix(in srgb, var(--paper2) 60%, var(--paper));
+      border: 1.5px solid var(--paper3);
+      border-radius: 2px;
+      overflow: hidden;
     }
-    .canvas-wrap:has(#emptyState:not([style*="display: none"])) {
-      height: auto;
-    }
+
     canvas {
       display: block;
       width: 100%;
       height: 100%;
     }
-
-    /* empty state */
     .empty-state {
-      height: auto;
-      padding: .6rem 0;
+      position: absolute;
+      inset: 0;
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: .5rem;
-      color: var(--muted);
-      font-size: .8rem;
+      color: var(--ink4);
     }
-    .empty-state span { font-size: 1.1rem; }
+    .empty-state .empty-icon {
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-style: italic;
+      opacity: .4;
+    }
+    .empty-state p {
+      font-family: var(--mono);
+      font-size: .65rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
 
-    /* ---------- STATS ROW ---------- */
+    /* ── STATS LEDGER ── */
     .stats-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: .6rem;
-      margin-top: 1rem;
+      margin-top: 1.2rem;
+      border: 1.5px solid var(--ink);
+      border-radius: 2px;
+      overflow: hidden;
     }
     .stat-box {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: .85rem;
-      padding: .75rem .5rem;
+      padding: 1rem .75rem;
       text-align: center;
+      border-right: 1.5px solid var(--ink);
+      background: transparent;
+      position: relative;
     }
+    .stat-box:last-child { border-right: none; }
+    .stat-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--terra);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .4s ease;
+    }
+    .stat-box.loaded::before { transform: scaleX(1); }
     .stat-box .val {
-      font-size: 1.6rem;
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-weight: 900;
       line-height: 1;
-      margin-bottom: .25rem;
+      margin-bottom: .3rem;
+      color: var(--ink);
     }
     .stat-box .key {
-      font-size: .65rem;
-      color: var(--muted);
+      font-family: var(--mono);
+      font-size: .55rem;
+      color: var(--ink4);
       text-transform: uppercase;
-      letter-spacing: .07em;
+      letter-spacing: .12em;
     }
 
-    /* ---------- RECENT LIST ---------- */
-    .recent-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: .75rem;
+    /* ── RECENT ENTRIES ── */
+    .recent-section {
+      animation: fadeIn .7s .3s ease both;
     }
-    .recent-header h2 {
-      font-size: .8rem;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: var(--muted);
+    .recent-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
     }
     .clear-btn {
       all: unset;
       cursor: pointer;
-      font-size: .7rem;
-      color: var(--muted);
-      padding: .25rem .6rem;
-      border-radius: .4rem;
-      border: 1px solid var(--border);
-      transition: color .15s, border-color .15s;
+      font-family: var(--mono);
+      font-size: .6rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--ink4);
+      padding: .3rem .7rem;
+      border: 1px solid var(--paper3);
+      border-radius: 2px;
+      transition: color .15s, border-color .15s, background .15s;
     }
-    .clear-btn:hover { color: #ff6b6b; border-color: #ff6b6b; }
+    .clear-btn:hover {
+      color: var(--terra);
+      border-color: var(--terra);
+      background: var(--terra-lt);
+    }
 
     .log-list {
       display: flex;
       flex-direction: column;
-      gap: .45rem;
-      max-height: 240px;
+      max-height: 280px;
       overflow-y: auto;
-      padding-right: .2rem;
       scrollbar-width: thin;
-      scrollbar-color: var(--border) transparent;
+      scrollbar-color: var(--paper3) transparent;
+      border: 1.5px solid var(--paper3);
+      border-radius: 2px;
+      overflow: hidden;
+      overflow-y: auto;
     }
     .log-item {
-      display: flex;
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
       align-items: center;
       gap: .75rem;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: .75rem;
-      padding: .6rem .85rem;
-      font-size: .85rem;
-      animation: slideIn .3s ease;
+      padding: .65rem 1rem;
+      border-bottom: 1px solid var(--paper3);
+      animation: slideRight .25s ease;
+      background: transparent;
+      transition: background .15s;
     }
-    .log-item .item-emoji { font-size: 1.25rem; }
-    .log-item .item-name { flex: 1; font-weight: 500; }
-    .log-item .item-time { color: var(--muted); font-size: .72rem; }
+    .log-item:last-child { border-bottom: none; }
+    .log-item:hover { background: var(--paper2); }
 
-    /* ---------- ANIMATIONS ---------- */
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-14px); }
-      to   { opacity: 1; transform: translateY(0); }
+    .log-item .item-num {
+      font-family: var(--mono);
+      font-size: .6rem;
+      color: var(--ink4);
+      width: 1.5rem;
+      text-align: right;
     }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
+    .log-item .item-emoji { font-size: 1.1rem; }
+    .log-item .item-name {
+      font-family: var(--lora);
+      font-size: .88rem;
+      font-style: italic;
+      color: var(--ink2);
     }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(-12px); }
-      to   { opacity: 1; transform: translateX(0); }
+    .log-item .item-mood-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--mood-dot-color, var(--ink4));
+      flex-shrink: 0;
+    }
+    .log-item .item-time {
+      font-family: var(--mono);
+      font-size: .6rem;
+      color: var(--ink4);
+      text-align: right;
     }
 
-    /* ---------- FLOATING TOAST ---------- */
+    /* ── TOAST ── */
     .toast {
       position: fixed;
-      bottom: 1.5rem;
+      bottom: 2rem;
       left: 50%;
-      transform: translateX(-50%) translateY(4rem);
-      background: var(--surface2);
-      border: 1px solid var(--accent);
-      color: var(--text);
-      padding: .65rem 1.4rem;
-      border-radius: 2rem;
-      font-size: .85rem;
+      transform: translateX(-50%) translateY(3rem);
+      background: var(--ink);
+      color: var(--paper);
+      padding: .6rem 1.4rem;
+      border-radius: 2px;
+      font-family: var(--mono);
+      font-size: .72rem;
+      letter-spacing: .06em;
       font-weight: 500;
-      box-shadow: 0 6px 24px rgba(0,0,0,.5);
+      box-shadow: 4px 4px 0 var(--ink3);
       pointer-events: none;
       opacity: 0;
-      transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s;
-      z-index: 99;
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+      z-index: 999;
       white-space: nowrap;
     }
     .toast.show {
@@ -368,157 +534,186 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* ---------- PARTICLE BURST ---------- */
-    .burst { position: fixed; pointer-events: none; z-index: 100; }
+    /* ── PARTICLE BURST ── */
+    .burst { position: fixed; pointer-events: none; z-index: 9999; }
     .burst-dot {
       position: absolute;
-      width: 8px; height: 8px;
+      width: 7px; height: 7px;
       border-radius: 50%;
       will-change: transform, opacity;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideRight {
+      from { opacity: 0; transform: translateX(-10px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 480px) {
+      .masthead { flex-direction: column; align-items: flex-start; }
+      .masthead-divider { display: none; }
+      .masthead-right { text-align: left; }
+      .mood-grid { grid-template-columns: repeat(5, 1fr); gap: .45rem; }
+      .mood-btn { padding: .65rem .2rem .55rem; }
+      .mood-btn .emoji { font-size: 1.4rem; }
     }
   </style>
 </head>
 <body>
+<div class="page">
 
-<header>
-  <h1>Mood Tracker</h1>
-  <p>How are you feeling right now?</p>
-</header>
-
-<div class="card pick-section" id="pickCard">
-  <h2>Pick your mood</h2>
-  <div class="mood-grid" id="moodGrid"></div>
-  <div class="log-wrap">
-    <button class="log-btn" id="logBtn" disabled>Log Mood</button>
-  </div>
-</div>
-
-<div style="height:.9rem"></div>
-
-<div class="card chart-section" id="chartCard">
-  <div class="chart-header">
-    <h2>Mood history</h2>
-    <div class="chart-controls">
-      <button class="view-btn active" id="btnBar">Bar</button>
-      <button class="view-btn" id="btnLine">Line</button>
+  <!-- MASTHEAD -->
+  <header class="masthead">
+    <div class="masthead-left">
+      <div class="masthead-label">Personal Field Notes</div>
+      <h1>Mood<br><em>Tracker</em></h1>
     </div>
-  </div>
-
-  <div class="canvas-wrap" id="canvasWrap">
-    <div class="empty-state" id="emptyState">
-      <span>📭</span>
-      No entries yet — log your first mood!
+    <div class="masthead-divider"></div>
+    <div class="masthead-right">
+      <div class="masthead-date" id="mastheadDate"></div>
     </div>
-    <canvas id="chart" style="display:none"></canvas>
-  </div>
+  </header>
 
-  <div class="stats-row" id="statsRow" style="display:none">
-    <div class="stat-box"><div class="val" id="statStreak">0</div><div class="key">Day streak</div></div>
-    <div class="stat-box"><div class="val" id="statTotal">0</div><div class="key">Total logs</div></div>
-    <div class="stat-box"><div class="val" id="statTop">—</div><div class="key">Top mood</div></div>
-  </div>
-</div>
+  <!-- MOOD PICKER -->
+  <section class="pick-section">
+    <div class="section-label">Today's entry</div>
+    <p class="mood-question">How are you feeling right now?</p>
+    <div class="mood-grid" id="moodGrid"></div>
+    <div class="log-wrap">
+      <button class="log-btn" id="logBtn" disabled><span>Record entry</span></button>
+      <span class="log-hint" id="logHint">select a mood above</span>
+    </div>
+  </section>
 
-<div style="height:.9rem"></div>
+  <hr class="ink-rule heavy">
 
-<div class="card" id="recentCard" style="display:none">
-  <div class="recent-header">
-    <h2>Recent entries</h2>
-    <button class="clear-btn" id="clearBtn">Clear all</button>
-  </div>
-  <div class="log-list" id="logList"></div>
-</div>
+  <!-- CHART -->
+  <section class="chart-section" id="chartCard">
+    <div class="chart-controls-row">
+      <div class="section-label" style="margin-bottom:0;flex:1">14-day history</div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="btnBar">Bar</button>
+        <button class="view-btn" id="btnLine">Line</button>
+      </div>
+    </div>
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="empty-state" id="emptyState">
+        <span class="empty-icon">&#8203;</span>
+        <p>No entries yet</p>
+      </div>
+      <canvas id="chart" style="display:none"></canvas>
+    </div>
+
+    <div class="stats-row" id="statsRow" style="display:none">
+      <div class="stat-box" id="statBoxStreak">
+        <div class="val" id="statStreak">0</div>
+        <div class="key">Day streak</div>
+      </div>
+      <div class="stat-box" id="statBoxTotal">
+        <div class="val" id="statTotal">0</div>
+        <div class="key">Total logs</div>
+      </div>
+      <div class="stat-box" id="statBoxTop">
+        <div class="val" id="statTop">&#8212;</div>
+        <div class="key">Top mood</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECENT ENTRIES -->
+  <section class="recent-section" id="recentCard" style="display:none">
+    <hr class="ink-rule">
+    <div class="recent-header-row">
+      <div class="section-label" style="margin-bottom:0;flex:1">Recent entries</div>
+      <button class="clear-btn" id="clearBtn">Clear all</button>
+    </div>
+    <div class="log-list" id="logList"></div>
+  </section>
+
+</div><!-- /page -->
 
 <div class="toast" id="toast"></div>
 
 <script>
-/* ===================== DATA ===================== */
+/* ===== DATA ===== */
 const MOODS = [
-  { emoji: '😁', label: 'Great',    score: 5, color: '#4ade80',  btnColor: 'rgba(74,222,128,.18)',  borderColor: '#4ade80' },
-  { emoji: '🙂', label: 'Good',     score: 4, color: '#2dd4bf',  btnColor: 'rgba(45,212,191,.18)',  borderColor: '#2dd4bf' },
-  { emoji: '😐', label: 'Okay',     score: 3, color: '#facc15',  btnColor: 'rgba(250,204,21,.18)',  borderColor: '#facc15' },
-  { emoji: '😕', label: 'Low',      score: 2, color: '#fb923c',  btnColor: 'rgba(251,146,60,.18)',  borderColor: '#fb923c' },
-  { emoji: '😢', label: 'Sad',      score: 1, color: '#60a5fa',  btnColor: 'rgba(96,165,250,.18)',  borderColor: '#60a5fa' },
-  { emoji: '😡', label: 'Angry',    score: 1, color: '#ef4444',  btnColor: 'rgba(239,68,68,.18)',   borderColor: '#ef4444' },
-  { emoji: '😰', label: 'Anxious',  score: 2, color: '#c084fc',  btnColor: 'rgba(192,132,252,.18)', borderColor: '#c084fc' },
-  { emoji: '😴', label: 'Tired',    score: 2, color: '#94a3b8',  btnColor: 'rgba(148,163,184,.18)', borderColor: '#94a3b8' },
-  { emoji: '🤩', label: 'Excited',  score: 5, color: '#f472b6',  btnColor: 'rgba(244,114,182,.18)', borderColor: '#f472b6' },
-  { emoji: '😌', label: 'Calm',     score: 4, color: '#22d3ee',  btnColor: 'rgba(34,211,238,.18)',  borderColor: '#22d3ee' },
+  { emoji: '😁', label: 'Great',   score: 5, color: '#3D9A5C', ink: '#3D9A5C' },
+  { emoji: '🙂', label: 'Good',    score: 4, color: '#2A8A7E', ink: '#2A8A7E' },
+  { emoji: '😐', label: 'Okay',    score: 3, color: '#B8860B', ink: '#B8860B' },
+  { emoji: '😕', label: 'Low',     score: 2, color: '#C4622D', ink: '#C4622D' },
+  { emoji: '😢', label: 'Sad',     score: 1, color: '#3B6EA5', ink: '#3B6EA5' },
+  { emoji: '😡', label: 'Angry',   score: 1, color: '#A82C2C', ink: '#A82C2C' },
+  { emoji: '😰', label: 'Anxious', score: 2, color: '#7A4F9A', ink: '#7A4F9A' },
+  { emoji: '😴', label: 'Tired',   score: 2, color: '#5A6B7A', ink: '#5A6B7A' },
+  { emoji: '🤩', label: 'Excited', score: 5, color: '#B5476A', ink: '#B5476A' },
+  { emoji: '😌', label: 'Calm',    score: 4, color: '#2878A0', ink: '#2878A0' },
 ];
 
 const STORAGE_KEY = 'mood_tracker_log';
+function loadLog() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
+function saveLog(log) { localStorage.setItem(STORAGE_KEY, JSON.stringify(log)); }
 
-function loadLog() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-  catch { return []; }
-}
-function saveLog(log) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(log));
-}
-
-/* ===================== STATE ===================== */
+/* ===== STATE ===== */
 let log = loadLog();
 let selectedMood = null;
-let chartMode = 'bar'; // 'bar' | 'line'
+let chartMode = 'bar';
 let animFrame = null;
 
-/* ===================== BUILD MOOD GRID ===================== */
+/* ===== DATE HEADER ===== */
+const now = new Date();
+document.getElementById('mastheadDate').innerHTML =
+  `${now.toLocaleDateString('en-US', {weekday:'long'})}<br>${now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`;
+
+/* ===== BUILD MOOD GRID ===== */
 const grid = document.getElementById('moodGrid');
 MOODS.forEach((m, i) => {
   const btn = document.createElement('button');
   btn.className = 'mood-btn';
   btn.dataset.idx = i;
-  btn.dataset.mood = m.label.toLowerCase();
-  btn.dataset.color = m.borderColor;
-  btn.dataset.bg = m.btnColor;
-  btn.style.setProperty('--mood-color', m.borderColor);
-  btn.style.setProperty('--mood-bg', m.btnColor);
-  btn.innerHTML = `<span class="emoji">${m.emoji}</span><span class="label">${m.label}</span><span class="check">&#10003;</span>`;
+  btn.style.setProperty('--mood-ink', m.ink);
+  btn.innerHTML = `<span class="emoji">${m.emoji}</span><span class="label">${m.label}</span>`;
   btn.addEventListener('click', () => selectMood(i, btn));
   grid.appendChild(btn);
 });
 
 function selectMood(idx, btn) {
-  document.querySelectorAll('.mood-btn').forEach(b => {
-    b.classList.remove('selected');
-    b.style.borderColor = 'transparent';
-    b.style.background = '';
-    b.style.boxShadow = '';
-  });
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
-  const c = btn.dataset.color;
-  const bg = btn.dataset.bg;
-  btn.style.borderColor = c;
-  btn.style.background = bg;
-  btn.style.boxShadow = `0 0 0 2px ${c}55, 0 0 18px ${c}66`;
   selectedMood = idx;
-  document.getElementById('logBtn').disabled = false;
+  const lb = document.getElementById('logBtn');
+  lb.disabled = false;
+  document.getElementById('logHint').textContent = MOODS[idx].label.toLowerCase() + ' — ready to log';
 }
 
-/* ===================== LOG BUTTON ===================== */
+/* ===== LOG BUTTON ===== */
 document.getElementById('logBtn').addEventListener('click', () => {
   if (selectedMood === null) return;
   const m = MOODS[selectedMood];
-  const entry = { mood: selectedMood, ts: Date.now() };
-  log.unshift(entry);
+  log.unshift({ mood: selectedMood, ts: Date.now() });
   saveLog(log);
 
-  // reset selection
   document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
   selectedMood = null;
-  document.getElementById('logBtn').disabled = true;
+  const lb = document.getElementById('logBtn');
+  lb.disabled = true;
+  document.getElementById('logHint').textContent = 'select a mood above';
 
-  const btn = document.getElementById('logBtn');
-  btn.classList.remove('flash');
-  void btn.offsetWidth; // reflow
-  btn.classList.add('flash');
+  lb.classList.remove('flash');
+  void lb.offsetWidth;
+  lb.classList.add('flash');
 
-  showToast(`${m.emoji} ${m.label} logged!`);
+  showToast(`${m.emoji}  ${m.label} recorded`);
   spawnBurst(m.color);
   render();
 });
 
-/* ===================== CHART VIEW TOGGLE ===================== */
+/* ===== CHART TOGGLE ===== */
 document.getElementById('btnBar').addEventListener('click', () => {
   chartMode = 'bar';
   document.getElementById('btnBar').classList.add('active');
@@ -532,42 +727,41 @@ document.getElementById('btnLine').addEventListener('click', () => {
   drawChart();
 });
 
-/* ===================== CLEAR ===================== */
+/* ===== CLEAR ===== */
 document.getElementById('clearBtn').addEventListener('click', () => {
   if (!confirm('Clear all mood history?')) return;
-  log = [];
-  saveLog(log);
-  render();
+  log = []; saveLog(log); render();
 });
 
-/* ===================== RENDER ===================== */
-function render() {
-  renderStats();
-  renderList();
-  drawChart();
-}
+/* ===== RENDER ===== */
+function render() { renderStats(); renderList(); drawChart(); }
 
 function renderStats() {
   const statsRow = document.getElementById('statsRow');
   if (log.length === 0) { statsRow.style.display = 'none'; return; }
   statsRow.style.display = 'grid';
 
-  // streak
   const days = new Set(log.map(e => new Date(e.ts).toDateString()));
-  let streak = 0;
-  let d = new Date();
-  while (days.has(d.toDateString())) {
-    streak++;
-    d.setDate(d.getDate() - 1);
-  }
+  let streak = 0, d = new Date();
+  while (days.has(d.toDateString())) { streak++; d.setDate(d.getDate() - 1); }
+
   document.getElementById('statStreak').textContent = streak;
   document.getElementById('statTotal').textContent = log.length;
 
-  // top mood
   const counts = {};
   log.forEach(e => { counts[e.mood] = (counts[e.mood] || 0) + 1; });
   const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
   document.getElementById('statTop').textContent = top ? MOODS[top[0]].emoji : '—';
+
+  // trigger the top-bar accent animation
+  setTimeout(() => {
+    ['statBoxStreak','statBoxTotal','statBoxTop'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.remove('loaded');
+      void el.offsetWidth;
+      el.classList.add('loaded');
+    });
+  }, 50);
 }
 
 function renderList() {
@@ -575,36 +769,31 @@ function renderList() {
   const list = document.getElementById('logList');
   if (log.length === 0) { recentCard.style.display = 'none'; return; }
   recentCard.style.display = 'block';
-
   list.innerHTML = '';
-  log.slice(0, 20).forEach(entry => {
+  log.slice(0, 20).forEach((entry, i) => {
     const m = MOODS[entry.mood];
     const dt = new Date(entry.ts);
     const timeStr = dt.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     const item = document.createElement('div');
     item.className = 'log-item';
     item.innerHTML = `
+      <span class="item-num">${String(i+1).padStart(2,'0')}</span>
       <span class="item-emoji">${m.emoji}</span>
       <span class="item-name">${m.label}</span>
+      <span class="item-mood-dot" style="--mood-dot-color:${m.color}"></span>
       <span class="item-time">${timeStr}</span>`;
     list.appendChild(item);
   });
 }
 
-/* ===================== CHART ===================== */
+/* ===== CHART ===== */
 function drawChart() {
   const emptyState = document.getElementById('emptyState');
   const canvas = document.getElementById('chart');
-
   if (log.length === 0) {
-    emptyState.style.display = 'flex';
-    canvas.style.display = 'none';
-    return;
+    emptyState.style.display = 'flex'; canvas.style.display = 'none'; return;
   }
-  emptyState.style.display = 'none';
-  canvas.style.display = 'block';
-
-  // Build last-14-days buckets
+  emptyState.style.display = 'none'; canvas.style.display = 'block';
   const buckets = buildBuckets(14);
   cancelAnimationFrame(animFrame);
   if (chartMode === 'bar') animateBar(canvas, buckets);
@@ -614,204 +803,145 @@ function drawChart() {
 function buildBuckets(n) {
   const buckets = [];
   for (let i = n - 1; i >= 0; i--) {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() - i);
+    const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - i);
     const label = d.toLocaleDateString([], { month: 'short', day: 'numeric' });
     const dayStr = d.toDateString();
     const entries = log.filter(e => new Date(e.ts).toDateString() === dayStr);
-    const avg = entries.length
-      ? entries.reduce((s, e) => s + MOODS[e.mood].score, 0) / entries.length
-      : null;
-    const color = avg !== null ? scoreColor(avg) : null;
-    buckets.push({ label, avg, color, count: entries.length });
+    const avg = entries.length ? entries.reduce((s, e) => s + MOODS[e.mood].score, 0) / entries.length : null;
+    buckets.push({ label, avg, count: entries.length });
   }
   return buckets;
 }
 
 function scoreColor(score) {
-  // 1=red -> 3=yellow -> 5=green
-  if (score >= 4.5) return '#4ade80';
-  if (score >= 3.5) return '#a3e635';
-  if (score >= 2.5) return '#facc15';
-  if (score >= 1.5) return '#fb923c';
-  return '#f87171';
+  if (score >= 4.5) return '#3D9A5C';
+  if (score >= 3.5) return '#6A9A3A';
+  if (score >= 2.5) return '#B8860B';
+  if (score >= 1.5) return '#C4622D';
+  return '#A82C2C';
 }
 
 function setupCanvas(canvas) {
   const wrap = canvas.parentElement;
   const dpr = window.devicePixelRatio || 1;
-  const w = wrap.clientWidth;
-  const h = wrap.clientHeight;
-  canvas.width = w * dpr;
-  canvas.height = h * dpr;
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
+  const w = wrap.clientWidth; const h = wrap.clientHeight;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
   return { ctx, w, h };
 }
 
-/* ---- BAR CHART ---- */
 function animateBar(canvas, buckets) {
   const { ctx, w, h } = setupCanvas(canvas);
-  const PAD = { top: 10, right: 8, bottom: 32, left: 8 };
-  const chartW = w - PAD.left - PAD.right;
-  const chartH = h - PAD.top - PAD.bottom;
+  const PAD = { top: 14, right: 12, bottom: 30, left: 12 };
+  const cW = w - PAD.left - PAD.right;
+  const cH = h - PAD.top - PAD.bottom;
   const n = buckets.length;
-  const gap = 3;
-  const barW = (chartW - gap * (n - 1)) / n;
-  const maxScore = 5;
-
-  let progress = 0;
-  const duration = 600;
-  let start = null;
+  const gap = 4;
+  const barW = (cW - gap * (n - 1)) / n;
+  let progress = 0; let start = null;
 
   function frame(ts) {
     if (!start) start = ts;
-    progress = Math.min((ts - start) / duration, 1);
+    progress = Math.min((ts - start) / 550, 1);
     const ease = 1 - Math.pow(1 - progress, 3);
-
     ctx.clearRect(0, 0, w, h);
-
-    // grid lines
-    ctx.strokeStyle = 'rgba(255,255,255,.05)';
-    ctx.lineWidth = 1;
-    for (let i = 1; i <= 5; i++) {
-      const y = PAD.top + chartH - (i / maxScore) * chartH;
-      ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(w - PAD.right, y); ctx.stroke();
-    }
 
     buckets.forEach((b, i) => {
       const x = PAD.left + i * (barW + gap);
-      const frac = b.avg !== null ? (b.avg / maxScore) * ease : 0;
-      const barH = frac * chartH;
-      const y = PAD.top + chartH - barH;
-
       if (b.avg !== null) {
-        // glow
-        const grd = ctx.createLinearGradient(0, y, 0, PAD.top + chartH);
-        grd.addColorStop(0, b.color);
-        grd.addColorStop(1, b.color + '33');
-        ctx.fillStyle = grd;
-        roundRect(ctx, x, y, barW, barH, Math.min(4, barW / 2));
+        const bH = (b.avg / 5) * cH * ease;
+        const y = PAD.top + cH - bH;
+        const c = scoreColor(b.avg);
+        ctx.fillStyle = c;
+        roundRect(ctx, x, y, barW, bH, Math.min(3, barW / 3));
+        ctx.fill();
+        // top tick
+        ctx.fillStyle = c;
+        roundRect(ctx, x, y - 2, barW, 3, 1);
         ctx.fill();
       } else {
-        ctx.fillStyle = 'rgba(255,255,255,.04)';
-        roundRect(ctx, x, PAD.top + chartH - 4, barW, 4, 2);
+        ctx.fillStyle = 'rgba(100,80,55,.08)';
+        roundRect(ctx, x, PAD.top + cH - 3, barW, 3, 1);
         ctx.fill();
       }
-
-      // label every 3rd or on mobile every 4th
+      // label
       if (i % 3 === 0 || n <= 7) {
-        ctx.fillStyle = 'rgba(255,255,255,.25)';
-        ctx.font = '9px system-ui';
+        ctx.fillStyle = 'rgba(100,80,55,.4)';
+        ctx.font = `500 8px 'DM Mono', monospace`;
         ctx.textAlign = 'center';
         ctx.fillText(b.label, x + barW / 2, h - 8);
       }
     });
-
     if (progress < 1) animFrame = requestAnimationFrame(frame);
   }
   animFrame = requestAnimationFrame(frame);
 }
 
-/* ---- LINE CHART ---- */
 function animateLine(canvas, buckets) {
   const { ctx, w, h } = setupCanvas(canvas);
-  const PAD = { top: 14, right: 12, bottom: 32, left: 12 };
-  const chartW = w - PAD.left - PAD.right;
-  const chartH = h - PAD.top - PAD.bottom;
-  const maxScore = 5;
-  const filled = buckets.filter(b => b.avg !== null);
-  if (filled.length === 0) return;
-
-  let progress = 0;
-  const duration = 700;
-  let start = null;
+  const PAD = { top: 14, right: 16, bottom: 30, left: 16 };
+  const cW = w - PAD.left - PAD.right;
+  const cH = h - PAD.top - PAD.bottom;
+  const validPts = buckets
+    .map((b, i) => b.avg !== null ? { x: PAD.left + (i/(buckets.length-1))*cW, y: PAD.top + cH - (b.avg/5)*cH, b } : null)
+    .filter(Boolean);
+  if (validPts.length === 0) return;
+  let progress = 0; let start = null;
 
   function frame(ts) {
     if (!start) start = ts;
-    progress = Math.min((ts - start) / duration, 1);
-
+    progress = Math.min((ts - start) / 650, 1);
     ctx.clearRect(0, 0, w, h);
 
-    // grid lines
-    ctx.strokeStyle = 'rgba(255,255,255,.05)';
-    ctx.lineWidth = 1;
-    for (let i = 1; i <= 5; i++) {
-      const y = PAD.top + chartH - (i / maxScore) * chartH;
-      ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(w - PAD.right, y); ctx.stroke();
-    }
+    ctx.save();
+    ctx.rect(PAD.left, 0, cW * progress, h);
+    ctx.clip();
 
-    const pts = buckets.map((b, i) => {
-      const x = PAD.left + (i / (buckets.length - 1)) * chartW;
-      const y = b.avg !== null
-        ? PAD.top + chartH - (b.avg / maxScore) * chartH
-        : null;
-      return { x, y, b };
+    // area
+    const grd = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + cH);
+    grd.addColorStop(0, 'rgba(196,98,45,.25)');
+    grd.addColorStop(1, 'rgba(196,98,45,.02)');
+    ctx.beginPath();
+    ctx.moveTo(validPts[0].x, PAD.top + cH);
+    ctx.lineTo(validPts[0].x, validPts[0].y);
+    for (let i = 1; i < validPts.length; i++) {
+      const cp = (validPts[i].x + validPts[i-1].x) / 2;
+      ctx.bezierCurveTo(cp, validPts[i-1].y, cp, validPts[i].y, validPts[i].x, validPts[i].y);
+    }
+    ctx.lineTo(validPts[validPts.length-1].x, PAD.top + cH);
+    ctx.closePath();
+    ctx.fillStyle = grd;
+    ctx.fill();
+
+    // line
+    ctx.beginPath();
+    ctx.moveTo(validPts[0].x, validPts[0].y);
+    for (let i = 1; i < validPts.length; i++) {
+      const cp = (validPts[i].x + validPts[i-1].x) / 2;
+      ctx.bezierCurveTo(cp, validPts[i-1].y, cp, validPts[i].y, validPts[i].x, validPts[i].y);
+    }
+    ctx.strokeStyle = '#C4622D';
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    // dots
+    validPts.forEach(p => {
+      ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+      ctx.fillStyle = scoreColor(p.b.avg);
+      ctx.fill();
+      ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--paper').trim() || '#F4EFE4';
+      ctx.lineWidth = 1.5; ctx.stroke();
     });
 
-    // filled area
-    const validPts = pts.filter(p => p.y !== null);
-    if (validPts.length > 1) {
-      // clip to progress
-      const totalLen = validPts.length - 1;
-      const drawTo = progress * totalLen;
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(PAD.left, PAD.top, chartW * progress, chartH + PAD.bottom);
-      ctx.clip();
-
-      // area fill
-      const grd = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + chartH);
-      grd.addColorStop(0, 'rgba(124,106,255,.35)');
-      grd.addColorStop(1, 'rgba(124,106,255,.02)');
-      ctx.beginPath();
-      ctx.moveTo(validPts[0].x, PAD.top + chartH);
-      ctx.lineTo(validPts[0].x, validPts[0].y);
-      for (let i = 1; i < validPts.length; i++) {
-        const cp = (validPts[i].x + validPts[i - 1].x) / 2;
-        ctx.bezierCurveTo(cp, validPts[i - 1].y, cp, validPts[i].y, validPts[i].x, validPts[i].y);
-      }
-      ctx.lineTo(validPts[validPts.length - 1].x, PAD.top + chartH);
-      ctx.closePath();
-      ctx.fillStyle = grd;
-      ctx.fill();
-
-      // line
-      ctx.beginPath();
-      ctx.moveTo(validPts[0].x, validPts[0].y);
-      for (let i = 1; i < validPts.length; i++) {
-        const cp = (validPts[i].x + validPts[i - 1].x) / 2;
-        ctx.bezierCurveTo(cp, validPts[i - 1].y, cp, validPts[i].y, validPts[i].x, validPts[i].y);
-      }
-      ctx.strokeStyle = 'rgba(192,132,252,.9)';
-      ctx.lineWidth = 2.5;
-      ctx.lineJoin = 'round';
-      ctx.stroke();
-
-      ctx.restore();
-
-      // dots
-      validPts.forEach((p, i) => {
-        if (p.x > PAD.left + chartW * progress) return;
-        const score = p.b.avg;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = scoreColor(score);
-        ctx.fill();
-        ctx.strokeStyle = var_bg();
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      });
-    }
+    ctx.restore();
 
     // x labels
     buckets.forEach((b, i) => {
       if (i % 3 === 0 || buckets.length <= 7) {
-        const x = PAD.left + (i / (buckets.length - 1)) * chartW;
-        ctx.fillStyle = 'rgba(255,255,255,.25)';
-        ctx.font = '9px system-ui';
+        const x = PAD.left + (i/(buckets.length-1))*cW;
+        ctx.fillStyle = 'rgba(100,80,55,.4)';
+        ctx.font = `500 8px 'DM Mono', monospace`;
         ctx.textAlign = 'center';
         ctx.fillText(b.label, x, h - 8);
       }
@@ -822,79 +952,65 @@ function animateLine(canvas, buckets) {
   animFrame = requestAnimationFrame(frame);
 }
 
-function var_bg() {
-  return getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0d0d14';
-}
-
-/* ===================== HELPERS ===================== */
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
   ctx.closePath();
 }
 
-/* ===================== TOAST ===================== */
+/* ===== TOAST ===== */
 let toastTimer = null;
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-/* ===================== PARTICLE BURST ===================== */
+/* ===== PARTICLE BURST ===== */
 function spawnBurst(color) {
   const logBtn = document.getElementById('logBtn');
   const rect = logBtn.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
-
   const container = document.createElement('div');
   container.className = 'burst';
   container.style.cssText = `left:${cx}px;top:${cy}px;`;
   document.body.appendChild(container);
-
-  const count = 14;
+  const count = 12;
   const dots = [];
   for (let i = 0; i < count; i++) {
     const dot = document.createElement('div');
     dot.className = 'burst-dot';
     const angle = (i / count) * Math.PI * 2;
-    const dist = 40 + Math.random() * 40;
+    const dist = 35 + Math.random() * 45;
     dot.style.background = color;
     container.appendChild(dot);
-    dots.push({ dot, vx: Math.cos(angle) * dist, vy: Math.sin(angle) * dist });
+    dots.push({ dot, vx: Math.cos(angle)*dist, vy: Math.sin(angle)*dist });
   }
-
-  let start = null;
-  const dur = 600;
+  let start = null; const dur = 550;
   function anim(ts) {
     if (!start) start = ts;
     const p = Math.min((ts - start) / dur, 1);
-    const ease = 1 - Math.pow(p, 2);
     dots.forEach(({ dot, vx, vy }) => {
-      dot.style.transform = `translate(${vx * p}px,${vy * p}px)`;
-      dot.style.opacity = ease;
+      dot.style.transform = `translate(${vx*p}px,${vy*p}px)`;
+      dot.style.opacity = 1 - p*p;
     });
-    if (p < 1) requestAnimationFrame(anim);
-    else container.remove();
+    if (p < 1) requestAnimationFrame(anim); else container.remove();
   }
   requestAnimationFrame(anim);
 }
 
-/* ===================== RESIZE ===================== */
 window.addEventListener('resize', () => { if (log.length > 0) drawChart(); });
 
-/* ===================== INIT ===================== */
 render();
 </script>
 </body>
