@@ -88,22 +88,43 @@
       gap: .3rem;
       padding: .65rem .3rem;
       border-radius: .85rem;
-      border: 1.5px solid transparent;
+      border: 1.5px solid color-mix(in srgb, var(--mood-color, var(--border)) 35%, transparent);
       background: var(--surface2);
       transition: transform .15s, border-color .15s, box-shadow .15s, background .15s;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
+      position: relative;
     }
-    .mood-btn:hover { transform: translateY(-3px) scale(1.06); background: var(--border); }
+    .mood-btn:hover {
+      transform: translateY(-3px) scale(1.06);
+      border-color: color-mix(in srgb, var(--mood-color, var(--border)) 70%, transparent);
+      background: color-mix(in srgb, var(--mood-color, var(--border)) 12%, var(--surface2));
+      box-shadow: 0 0 12px color-mix(in srgb, var(--mood-color, transparent) 40%, transparent);
+    }
     .mood-btn:active { transform: scale(.94); }
     .mood-btn .emoji { font-size: 1.9rem; line-height: 1; }
     .mood-btn .label { font-size: .62rem; color: var(--muted); font-weight: 500; letter-spacing: .03em; }
-    .mood-btn.selected {
-      border-color: var(--accent);
-      box-shadow: 0 0 14px var(--glow);
-      background: rgba(124,106,255,.12);
+    .mood-btn .check {
+      position: absolute;
+      top: .3rem;
+      right: .35rem;
+      font-size: .65rem;
+      font-weight: 700;
+      color: var(--mood-color, var(--accent));
+      opacity: 0;
+      transform: scale(0);
+      transition: opacity .15s, transform .2s cubic-bezier(.34,1.56,.64,1);
+      line-height: 1;
     }
-    .mood-btn.selected .label { color: var(--accent2); }
+    .mood-btn.selected {
+      transform: scale(1.12);
+      border-color: var(--mood-color, var(--accent)) !important;
+      background: color-mix(in srgb, var(--mood-color, var(--accent)) 18%, var(--surface2)) !important;
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--mood-color, var(--accent)) 35%, transparent),
+                  0 0 22px color-mix(in srgb, var(--mood-color, var(--accent)) 55%, transparent) !important;
+    }
+    .mood-btn.selected .label { color: var(--mood-color, var(--accent2)); font-weight: 600; }
+    .mood-btn.selected .check { opacity: 1; transform: scale(1); }
 
     /* ---------- LOG BUTTON ---------- */
     .log-wrap {
@@ -114,18 +135,26 @@
     .log-btn {
       all: unset;
       cursor: pointer;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      background: linear-gradient(135deg, #c084fc, #7c6aff, #e879a0, #b46fff);
+      background-size: 200% 200%;
       color: #fff;
-      font-size: .9rem;
-      font-weight: 600;
-      padding: .7rem 2rem;
+      font-size: 1.2rem;
+      font-weight: 800;
+      padding: 1.1rem 4rem;
       border-radius: 2rem;
       transition: opacity .15s, transform .15s, box-shadow .15s;
-      box-shadow: 0 4px 18px var(--glow);
-      letter-spacing: .02em;
+      box-shadow: 0 4px 32px rgba(124,106,255,.75), 0 0 20px rgba(192,132,252,.45),
+                  inset 0 1px 0 rgba(255,255,255,.25);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      text-shadow: 0 1px 4px rgba(0,0,0,.4);
     }
-    .log-btn:disabled { opacity: .4; cursor: default; }
-    .log-btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 6px 24px var(--glow); }
+    .log-btn:disabled { opacity: .3; cursor: default; box-shadow: none; }
+    .log-btn:not(:disabled):hover {
+      transform: translateY(-4px) scale(1.07);
+      box-shadow: 0 12px 48px rgba(124,106,255,.85), 0 0 32px rgba(192,132,252,.6),
+                  0 0 0 4px rgba(124,106,255,.3), inset 0 1px 0 rgba(255,255,255,.25);
+    }
     .log-btn:not(:disabled):active { transform: scale(.96); }
 
     /* success flash */
@@ -189,6 +218,9 @@
       height: 180px;
       margin-bottom: .5rem;
     }
+    .canvas-wrap:has(#emptyState:not([style*="display: none"])) {
+      height: auto;
+    }
     canvas {
       display: block;
       width: 100%;
@@ -197,16 +229,17 @@
 
     /* empty state */
     .empty-state {
-      height: 180px;
+      height: auto;
+      padding: .6rem 0;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
       justify-content: center;
       gap: .5rem;
       color: var(--muted);
-      font-size: .85rem;
+      font-size: .8rem;
     }
-    .empty-state span { font-size: 2.5rem; }
+    .empty-state span { font-size: 1.1rem; }
 
     /* ---------- STATS ROW ---------- */
     .stats-row {
@@ -389,16 +422,16 @@
 <script>
 /* ===================== DATA ===================== */
 const MOODS = [
-  { emoji: '😄', label: 'Great',    score: 5, color: '#4ade80' },
-  { emoji: '🙂', label: 'Good',     score: 4, color: '#a3e635' },
-  { emoji: '😐', label: 'Okay',     score: 3, color: '#facc15' },
-  { emoji: '😔', label: 'Low',      score: 2, color: '#fb923c' },
-  { emoji: '😢', label: 'Sad',      score: 1, color: '#f87171' },
-  { emoji: '😡', label: 'Angry',    score: 1, color: '#ef4444' },
-  { emoji: '😰', label: 'Anxious',  score: 2, color: '#c084fc' },
-  { emoji: '🥱', label: 'Tired',    score: 2, color: '#94a3b8' },
-  { emoji: '🤩', label: 'Excited',  score: 5, color: '#38bdf8' },
-  { emoji: '😌', label: 'Calm',     score: 4, color: '#34d399' },
+  { emoji: '😄', label: 'Great',    score: 5, color: '#4ade80',  btnColor: 'rgba(74,222,128,.18)',  borderColor: '#4ade80' },
+  { emoji: '🙂', label: 'Good',     score: 4, color: '#2dd4bf',  btnColor: 'rgba(45,212,191,.18)',  borderColor: '#2dd4bf' },
+  { emoji: '😐', label: 'Okay',     score: 3, color: '#facc15',  btnColor: 'rgba(250,204,21,.18)',  borderColor: '#facc15' },
+  { emoji: '😔', label: 'Low',      score: 2, color: '#fb923c',  btnColor: 'rgba(251,146,60,.18)',  borderColor: '#fb923c' },
+  { emoji: '😢', label: 'Sad',      score: 1, color: '#60a5fa',  btnColor: 'rgba(96,165,250,.18)',  borderColor: '#60a5fa' },
+  { emoji: '😡', label: 'Angry',    score: 1, color: '#ef4444',  btnColor: 'rgba(239,68,68,.18)',   borderColor: '#ef4444' },
+  { emoji: '😰', label: 'Anxious',  score: 2, color: '#c084fc',  btnColor: 'rgba(192,132,252,.18)', borderColor: '#c084fc' },
+  { emoji: '😴', label: 'Tired',    score: 2, color: '#94a3b8',  btnColor: 'rgba(148,163,184,.18)', borderColor: '#94a3b8' },
+  { emoji: '🤩', label: 'Excited',  score: 5, color: '#f472b6',  btnColor: 'rgba(244,114,182,.18)', borderColor: '#f472b6' },
+  { emoji: '😌', label: 'Calm',     score: 4, color: '#22d3ee',  btnColor: 'rgba(34,211,238,.18)',  borderColor: '#22d3ee' },
 ];
 
 const STORAGE_KEY = 'mood_tracker_log';
@@ -423,14 +456,28 @@ MOODS.forEach((m, i) => {
   const btn = document.createElement('button');
   btn.className = 'mood-btn';
   btn.dataset.idx = i;
-  btn.innerHTML = `<span class="emoji">${m.emoji}</span><span class="label">${m.label}</span>`;
+  btn.dataset.color = m.borderColor;
+  btn.dataset.bg = m.btnColor;
+  btn.style.setProperty('--mood-color', m.borderColor);
+  btn.style.setProperty('--mood-bg', m.btnColor);
+  btn.innerHTML = `<span class="emoji">${m.emoji}</span><span class="label">${m.label}</span><span class="check">&#10003;</span>`;
   btn.addEventListener('click', () => selectMood(i, btn));
   grid.appendChild(btn);
 });
 
 function selectMood(idx, btn) {
-  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.mood-btn').forEach(b => {
+    b.classList.remove('selected');
+    b.style.borderColor = 'transparent';
+    b.style.background = '';
+    b.style.boxShadow = '';
+  });
   btn.classList.add('selected');
+  const c = btn.dataset.color;
+  const bg = btn.dataset.bg;
+  btn.style.borderColor = c;
+  btn.style.background = bg;
+  btn.style.boxShadow = `0 0 0 2px ${c}55, 0 0 18px ${c}66`;
   selectedMood = idx;
   document.getElementById('logBtn').disabled = false;
 }
