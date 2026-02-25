@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mood Tracker</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0d14;
+      --surface:   #15151f;
+      --surface2:  #1e1e2e;
+      --border:    #2a2a3e;
+      --text:      #e0e0f0;
+      --muted:     #6b6b8a;
+      --accent:    #7c6aff;
+      --accent2:   #c084fc;
+      --glow:      rgba(124,106,255,.35);
+    }
+
+    html { font-size: 16px; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem 3rem;
+      overflow-x: hidden;
+    }
+
+    /* ---------- HEADER ---------- */
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      animation: fadeDown .6s ease both;
+    }
+    header h1 {
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -.02em;
+    }
+    header p {
+      margin-top: .35rem;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    /* ---------- CARD ---------- */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    /* ---------- MOOD PICKER ---------- */
+    .pick-section {
+      animation: fadeDown .6s .1s ease both;
+    }
+    .pick-section h2 {
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+    .mood-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: .6rem;
+    }
+    .mood-btn {
+      all: unset;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .3rem;
+      padding: .65rem .3rem;
+      border-radius: .85rem;
+      border: 1.5px solid transparent;
+      background: var(--surface2);
+      transition: transform .15s, border-color .15s, box-shadow .15s, background .15s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mood-btn:hover { transform: translateY(-3px) scale(1.06); background: var(--border); }
+    .mood-btn:active { transform: scale(.94); }
+    .mood-btn .emoji { font-size: 1.9rem; line-height: 1; }
+    .mood-btn .label { font-size: .62rem; color: var(--muted); font-weight: 500; letter-spacing: .03em; }
+    .mood-btn.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 14px var(--glow);
+      background: rgba(124,106,255,.12);
+    }
+    .mood-btn.selected .label { color: var(--accent2); }
+
+    /* ---------- LOG BUTTON ---------- */
+    .log-wrap {
+      margin-top: 1.2rem;
+      display: flex;
+      justify-content: center;
+    }
+    .log-btn {
+      all: unset;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-size: .9rem;
+      font-weight: 600;
+      padding: .7rem 2rem;
+      border-radius: 2rem;
+      transition: opacity .15s, transform .15s, box-shadow .15s;
+      box-shadow: 0 4px 18px var(--glow);
+      letter-spacing: .02em;
+    }
+    .log-btn:disabled { opacity: .4; cursor: default; }
+    .log-btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 6px 24px var(--glow); }
+    .log-btn:not(:disabled):active { transform: scale(.96); }
+
+    /* success flash */
+    .log-btn.flash { animation: btnFlash .45s ease; }
+    @keyframes btnFlash {
+      0%   { transform: scale(1); }
+      30%  { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    /* ---------- DIVIDER ---------- */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 1.5rem 0;
+    }
+
+    /* ---------- CHART SECTION ---------- */
+    .chart-section {
+      animation: fadeUp .6s .2s ease both;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .chart-header h2 {
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+    }
+    .chart-controls {
+      display: flex;
+      gap: .4rem;
+    }
+    .view-btn {
+      all: unset;
+      cursor: pointer;
+      font-size: .7rem;
+      font-weight: 600;
+      padding: .3rem .75rem;
+      border-radius: .5rem;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      letter-spacing: .04em;
+      transition: color .15s, background .15s, border-color .15s;
+    }
+    .view-btn.active {
+      color: var(--accent2);
+      background: rgba(124,106,255,.15);
+      border-color: var(--accent);
+    }
+
+    /* Canvas wrapper */
+    .canvas-wrap {
+      position: relative;
+      width: 100%;
+      height: 180px;
+      margin-bottom: .5rem;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* empty state */
+    .empty-state {
+      height: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+    .empty-state span { font-size: 2.5rem; }
+
+    /* ---------- STATS ROW ---------- */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .6rem;
+      margin-top: 1rem;
+    }
+    .stat-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: .85rem;
+      padding: .75rem .5rem;
+      text-align: center;
+    }
+    .stat-box .val {
+      font-size: 1.6rem;
+      line-height: 1;
+      margin-bottom: .25rem;
+    }
+    .stat-box .key {
+      font-size: .65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+    }
+
+    /* ---------- RECENT LIST ---------- */
+    .recent-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: .75rem;
+    }
+    .recent-header h2 {
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+    }
+    .clear-btn {
+      all: unset;
+      cursor: pointer;
+      font-size: .7rem;
+      color: var(--muted);
+      padding: .25rem .6rem;
+      border-radius: .4rem;
+      border: 1px solid var(--border);
+      transition: color .15s, border-color .15s;
+    }
+    .clear-btn:hover { color: #ff6b6b; border-color: #ff6b6b; }
+
+    .log-list {
+      display: flex;
+      flex-direction: column;
+      gap: .45rem;
+      max-height: 240px;
+      overflow-y: auto;
+      padding-right: .2rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .log-item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: .75rem;
+      padding: .6rem .85rem;
+      font-size: .85rem;
+      animation: slideIn .3s ease;
+    }
+    .log-item .item-emoji { font-size: 1.25rem; }
+    .log-item .item-name { flex: 1; font-weight: 500; }
+    .log-item .item-time { color: var(--muted); font-size: .72rem; }
+
+    /* ---------- ANIMATIONS ---------- */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-12px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ---------- FLOATING TOAST ---------- */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(4rem);
+      background: var(--surface2);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      padding: .65rem 1.4rem;
+      border-radius: 2rem;
+      font-size: .85rem;
+      font-weight: 500;
+      box-shadow: 0 6px 24px rgba(0,0,0,.5);
+      pointer-events: none;
+      opacity: 0;
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s;
+      z-index: 99;
+      white-space: nowrap;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ---------- PARTICLE BURST ---------- */
+    .burst { position: fixed; pointer-events: none; z-index: 100; }
+    .burst-dot {
+      position: absolute;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      will-change: transform, opacity;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Mood Tracker</h1>
+  <p>How are you feeling right now?</p>
+</header>
+
+<div class="card pick-section" id="pickCard">
+  <h2>Pick your mood</h2>
+  <div class="mood-grid" id="moodGrid"></div>
+  <div class="log-wrap">
+    <button class="log-btn" id="logBtn" disabled>Log Mood</button>
+  </div>
+</div>
+
+<div style="height:.9rem"></div>
+
+<div class="card chart-section" id="chartCard">
+  <div class="chart-header">
+    <h2>Mood history</h2>
+    <div class="chart-controls">
+      <button class="view-btn active" id="btnBar">Bar</button>
+      <button class="view-btn" id="btnLine">Line</button>
+    </div>
+  </div>
+
+  <div class="canvas-wrap" id="canvasWrap">
+    <div class="empty-state" id="emptyState">
+      <span>📭</span>
+      No entries yet — log your first mood!
+    </div>
+    <canvas id="chart" style="display:none"></canvas>
+  </div>
+
+  <div class="stats-row" id="statsRow" style="display:none">
+    <div class="stat-box"><div class="val" id="statStreak">0</div><div class="key">Day streak</div></div>
+    <div class="stat-box"><div class="val" id="statTotal">0</div><div class="key">Total logs</div></div>
+    <div class="stat-box"><div class="val" id="statTop">—</div><div class="key">Top mood</div></div>
+  </div>
+</div>
+
+<div style="height:.9rem"></div>
+
+<div class="card" id="recentCard" style="display:none">
+  <div class="recent-header">
+    <h2>Recent entries</h2>
+    <button class="clear-btn" id="clearBtn">Clear all</button>
+  </div>
+  <div class="log-list" id="logList"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== DATA ===================== */
+const MOODS = [
+  { emoji: '😄', label: 'Great',    score: 5, color: '#4ade80' },
+  { emoji: '🙂', label: 'Good',     score: 4, color: '#a3e635' },
+  { emoji: '😐', label: 'Okay',     score: 3, color: '#facc15' },
+  { emoji: '😔', label: 'Low',      score: 2, color: '#fb923c' },
+  { emoji: '😢', label: 'Sad',      score: 1, color: '#f87171' },
+  { emoji: '😡', label: 'Angry',    score: 1, color: '#ef4444' },
+  { emoji: '😰', label: 'Anxious',  score: 2, color: '#c084fc' },
+  { emoji: '🥱', label: 'Tired',    score: 2, color: '#94a3b8' },
+  { emoji: '🤩', label: 'Excited',  score: 5, color: '#38bdf8' },
+  { emoji: '😌', label: 'Calm',     score: 4, color: '#34d399' },
+];
+
+const STORAGE_KEY = 'mood_tracker_log';
+
+function loadLog() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+function saveLog(log) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(log));
+}
+
+/* ===================== STATE ===================== */
+let log = loadLog();
+let selectedMood = null;
+let chartMode = 'bar'; // 'bar' | 'line'
+let animFrame = null;
+
+/* ===================== BUILD MOOD GRID ===================== */
+const grid = document.getElementById('moodGrid');
+MOODS.forEach((m, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'mood-btn';
+  btn.dataset.idx = i;
+  btn.innerHTML = `<span class="emoji">${m.emoji}</span><span class="label">${m.label}</span>`;
+  btn.addEventListener('click', () => selectMood(i, btn));
+  grid.appendChild(btn);
+});
+
+function selectMood(idx, btn) {
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedMood = idx;
+  document.getElementById('logBtn').disabled = false;
+}
+
+/* ===================== LOG BUTTON ===================== */
+document.getElementById('logBtn').addEventListener('click', () => {
+  if (selectedMood === null) return;
+  const m = MOODS[selectedMood];
+  const entry = { mood: selectedMood, ts: Date.now() };
+  log.unshift(entry);
+  saveLog(log);
+
+  // reset selection
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  selectedMood = null;
+  document.getElementById('logBtn').disabled = true;
+
+  const btn = document.getElementById('logBtn');
+  btn.classList.remove('flash');
+  void btn.offsetWidth; // reflow
+  btn.classList.add('flash');
+
+  showToast(`${m.emoji} ${m.label} logged!`);
+  spawnBurst(m.color);
+  render();
+});
+
+/* ===================== CHART VIEW TOGGLE ===================== */
+document.getElementById('btnBar').addEventListener('click', () => {
+  chartMode = 'bar';
+  document.getElementById('btnBar').classList.add('active');
+  document.getElementById('btnLine').classList.remove('active');
+  drawChart();
+});
+document.getElementById('btnLine').addEventListener('click', () => {
+  chartMode = 'line';
+  document.getElementById('btnLine').classList.add('active');
+  document.getElementById('btnBar').classList.remove('active');
+  drawChart();
+});
+
+/* ===================== CLEAR ===================== */
+document.getElementById('clearBtn').addEventListener('click', () => {
+  if (!confirm('Clear all mood history?')) return;
+  log = [];
+  saveLog(log);
+  render();
+});
+
+/* ===================== RENDER ===================== */
+function render() {
+  renderStats();
+  renderList();
+  drawChart();
+}
+
+function renderStats() {
+  const statsRow = document.getElementById('statsRow');
+  if (log.length === 0) { statsRow.style.display = 'none'; return; }
+  statsRow.style.display = 'grid';
+
+  // streak
+  const days = new Set(log.map(e => new Date(e.ts).toDateString()));
+  let streak = 0;
+  let d = new Date();
+  while (days.has(d.toDateString())) {
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+  document.getElementById('statStreak').textContent = streak;
+  document.getElementById('statTotal').textContent = log.length;
+
+  // top mood
+  const counts = {};
+  log.forEach(e => { counts[e.mood] = (counts[e.mood] || 0) + 1; });
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  document.getElementById('statTop').textContent = top ? MOODS[top[0]].emoji : '—';
+}
+
+function renderList() {
+  const recentCard = document.getElementById('recentCard');
+  const list = document.getElementById('logList');
+  if (log.length === 0) { recentCard.style.display = 'none'; return; }
+  recentCard.style.display = 'block';
+
+  list.innerHTML = '';
+  log.slice(0, 20).forEach(entry => {
+    const m = MOODS[entry.mood];
+    const dt = new Date(entry.ts);
+    const timeStr = dt.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const item = document.createElement('div');
+    item.className = 'log-item';
+    item.innerHTML = `
+      <span class="item-emoji">${m.emoji}</span>
+      <span class="item-name">${m.label}</span>
+      <span class="item-time">${timeStr}</span>`;
+    list.appendChild(item);
+  });
+}
+
+/* ===================== CHART ===================== */
+function drawChart() {
+  const emptyState = document.getElementById('emptyState');
+  const canvas = document.getElementById('chart');
+
+  if (log.length === 0) {
+    emptyState.style.display = 'flex';
+    canvas.style.display = 'none';
+    return;
+  }
+  emptyState.style.display = 'none';
+  canvas.style.display = 'block';
+
+  // Build last-14-days buckets
+  const buckets = buildBuckets(14);
+  cancelAnimationFrame(animFrame);
+  if (chartMode === 'bar') animateBar(canvas, buckets);
+  else animateLine(canvas, buckets);
+}
+
+function buildBuckets(n) {
+  const buckets = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - i);
+    const label = d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    const dayStr = d.toDateString();
+    const entries = log.filter(e => new Date(e.ts).toDateString() === dayStr);
+    const avg = entries.length
+      ? entries.reduce((s, e) => s + MOODS[e.mood].score, 0) / entries.length
+      : null;
+    const color = avg !== null ? scoreColor(avg) : null;
+    buckets.push({ label, avg, color, count: entries.length });
+  }
+  return buckets;
+}
+
+function scoreColor(score) {
+  // 1=red -> 3=yellow -> 5=green
+  if (score >= 4.5) return '#4ade80';
+  if (score >= 3.5) return '#a3e635';
+  if (score >= 2.5) return '#facc15';
+  if (score >= 1.5) return '#fb923c';
+  return '#f87171';
+}
+
+function setupCanvas(canvas) {
+  const wrap = canvas.parentElement;
+  const dpr = window.devicePixelRatio || 1;
+  const w = wrap.clientWidth;
+  const h = wrap.clientHeight;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return { ctx, w, h };
+}
+
+/* ---- BAR CHART ---- */
+function animateBar(canvas, buckets) {
+  const { ctx, w, h } = setupCanvas(canvas);
+  const PAD = { top: 10, right: 8, bottom: 32, left: 8 };
+  const chartW = w - PAD.left - PAD.right;
+  const chartH = h - PAD.top - PAD.bottom;
+  const n = buckets.length;
+  const gap = 3;
+  const barW = (chartW - gap * (n - 1)) / n;
+  const maxScore = 5;
+
+  let progress = 0;
+  const duration = 600;
+  let start = null;
+
+  function frame(ts) {
+    if (!start) start = ts;
+    progress = Math.min((ts - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+
+    ctx.clearRect(0, 0, w, h);
+
+    // grid lines
+    ctx.strokeStyle = 'rgba(255,255,255,.05)';
+    ctx.lineWidth = 1;
+    for (let i = 1; i <= 5; i++) {
+      const y = PAD.top + chartH - (i / maxScore) * chartH;
+      ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(w - PAD.right, y); ctx.stroke();
+    }
+
+    buckets.forEach((b, i) => {
+      const x = PAD.left + i * (barW + gap);
+      const frac = b.avg !== null ? (b.avg / maxScore) * ease : 0;
+      const barH = frac * chartH;
+      const y = PAD.top + chartH - barH;
+
+      if (b.avg !== null) {
+        // glow
+        const grd = ctx.createLinearGradient(0, y, 0, PAD.top + chartH);
+        grd.addColorStop(0, b.color);
+        grd.addColorStop(1, b.color + '33');
+        ctx.fillStyle = grd;
+        roundRect(ctx, x, y, barW, barH, Math.min(4, barW / 2));
+        ctx.fill();
+      } else {
+        ctx.fillStyle = 'rgba(255,255,255,.04)';
+        roundRect(ctx, x, PAD.top + chartH - 4, barW, 4, 2);
+        ctx.fill();
+      }
+
+      // label every 3rd or on mobile every 4th
+      if (i % 3 === 0 || n <= 7) {
+        ctx.fillStyle = 'rgba(255,255,255,.25)';
+        ctx.font = '9px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(b.label, x + barW / 2, h - 8);
+      }
+    });
+
+    if (progress < 1) animFrame = requestAnimationFrame(frame);
+  }
+  animFrame = requestAnimationFrame(frame);
+}
+
+/* ---- LINE CHART ---- */
+function animateLine(canvas, buckets) {
+  const { ctx, w, h } = setupCanvas(canvas);
+  const PAD = { top: 14, right: 12, bottom: 32, left: 12 };
+  const chartW = w - PAD.left - PAD.right;
+  const chartH = h - PAD.top - PAD.bottom;
+  const maxScore = 5;
+  const filled = buckets.filter(b => b.avg !== null);
+  if (filled.length === 0) return;
+
+  let progress = 0;
+  const duration = 700;
+  let start = null;
+
+  function frame(ts) {
+    if (!start) start = ts;
+    progress = Math.min((ts - start) / duration, 1);
+
+    ctx.clearRect(0, 0, w, h);
+
+    // grid lines
+    ctx.strokeStyle = 'rgba(255,255,255,.05)';
+    ctx.lineWidth = 1;
+    for (let i = 1; i <= 5; i++) {
+      const y = PAD.top + chartH - (i / maxScore) * chartH;
+      ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(w - PAD.right, y); ctx.stroke();
+    }
+
+    const pts = buckets.map((b, i) => {
+      const x = PAD.left + (i / (buckets.length - 1)) * chartW;
+      const y = b.avg !== null
+        ? PAD.top + chartH - (b.avg / maxScore) * chartH
+        : null;
+      return { x, y, b };
+    });
+
+    // filled area
+    const validPts = pts.filter(p => p.y !== null);
+    if (validPts.length > 1) {
+      // clip to progress
+      const totalLen = validPts.length - 1;
+      const drawTo = progress * totalLen;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(PAD.left, PAD.top, chartW * progress, chartH + PAD.bottom);
+      ctx.clip();
+
+      // area fill
+      const grd = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + chartH);
+      grd.addColorStop(0, 'rgba(124,106,255,.35)');
+      grd.addColorStop(1, 'rgba(124,106,255,.02)');
+      ctx.beginPath();
+      ctx.moveTo(validPts[0].x, PAD.top + chartH);
+      ctx.lineTo(validPts[0].x, validPts[0].y);
+      for (let i = 1; i < validPts.length; i++) {
+        const cp = (validPts[i].x + validPts[i - 1].x) / 2;
+        ctx.bezierCurveTo(cp, validPts[i - 1].y, cp, validPts[i].y, validPts[i].x, validPts[i].y);
+      }
+      ctx.lineTo(validPts[validPts.length - 1].x, PAD.top + chartH);
+      ctx.closePath();
+      ctx.fillStyle = grd;
+      ctx.fill();
+
+      // line
+      ctx.beginPath();
+      ctx.moveTo(validPts[0].x, validPts[0].y);
+      for (let i = 1; i < validPts.length; i++) {
+        const cp = (validPts[i].x + validPts[i - 1].x) / 2;
+        ctx.bezierCurveTo(cp, validPts[i - 1].y, cp, validPts[i].y, validPts[i].x, validPts[i].y);
+      }
+      ctx.strokeStyle = 'rgba(192,132,252,.9)';
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      ctx.restore();
+
+      // dots
+      validPts.forEach((p, i) => {
+        if (p.x > PAD.left + chartW * progress) return;
+        const score = p.b.avg;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = scoreColor(score);
+        ctx.fill();
+        ctx.strokeStyle = var_bg();
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+    }
+
+    // x labels
+    buckets.forEach((b, i) => {
+      if (i % 3 === 0 || buckets.length <= 7) {
+        const x = PAD.left + (i / (buckets.length - 1)) * chartW;
+        ctx.fillStyle = 'rgba(255,255,255,.25)';
+        ctx.font = '9px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(b.label, x, h - 8);
+      }
+    });
+
+    if (progress < 1) animFrame = requestAnimationFrame(frame);
+  }
+  animFrame = requestAnimationFrame(frame);
+}
+
+function var_bg() {
+  return getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0d0d14';
+}
+
+/* ===================== HELPERS ===================== */
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+/* ===================== TOAST ===================== */
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* ===================== PARTICLE BURST ===================== */
+function spawnBurst(color) {
+  const logBtn = document.getElementById('logBtn');
+  const rect = logBtn.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+
+  const container = document.createElement('div');
+  container.className = 'burst';
+  container.style.cssText = `left:${cx}px;top:${cy}px;`;
+  document.body.appendChild(container);
+
+  const count = 14;
+  const dots = [];
+  for (let i = 0; i < count; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'burst-dot';
+    const angle = (i / count) * Math.PI * 2;
+    const dist = 40 + Math.random() * 40;
+    dot.style.background = color;
+    container.appendChild(dot);
+    dots.push({ dot, vx: Math.cos(angle) * dist, vy: Math.sin(angle) * dist });
+  }
+
+  let start = null;
+  const dur = 600;
+  function anim(ts) {
+    if (!start) start = ts;
+    const p = Math.min((ts - start) / dur, 1);
+    const ease = 1 - Math.pow(p, 2);
+    dots.forEach(({ dot, vx, vy }) => {
+      dot.style.transform = `translate(${vx * p}px,${vy * p}px)`;
+      dot.style.opacity = ease;
+    });
+    if (p < 1) requestAnimationFrame(anim);
+    else container.remove();
+  }
+  requestAnimationFrame(anim);
+}
+
+/* ===================== RESIZE ===================== */
+window.addEventListener('resize', () => { if (log.length > 0) drawChart(); });
+
+/* ===================== INIT ===================== */
+render();
+</script>
+</body>
+</html>
